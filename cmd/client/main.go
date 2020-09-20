@@ -29,14 +29,13 @@ func post(file string) {
 		var product api.Product
 		// check if the JSON is well-formed before attempting to POST it
 		if err := json.Unmarshal(line, &product); err != nil {
-			fmt.Errorf("ignoring malformed JSON on line: %d\n", n)
+			fmt.Errorf("client: ignoring malformed JSON on line: %d\n", n)
 			continue
 		}
 		jsonReq, err := json.Marshal(product)
-		fmt.Printf("%s\n", jsonReq)
 		_, err = http.Post("http://localhost:8080/product/create", "application/json; charset=utf-8", bytes.NewBuffer(jsonReq))
 		if err != nil {
-			fmt.Errorf("API error: %s", err)
+			fmt.Errorf("client: API error: %s", err)
 		}
 
 	}
@@ -54,7 +53,6 @@ func usage() {
 }
 
 func main() {
-	log.SetPrefix("client: ")
 	log.SetFlags(0)
 	flag.Parse()
 
@@ -66,7 +64,7 @@ func main() {
 		return
 	}
 	if len(flag.Args()) > 1 {
-		fmt.Fprintf(os.Stderr, "too many arguments\n")
+		fmt.Fprintf(os.Stderr, "client: too many arguments\n")
 		usage()
 	}
 	post(*flagFile)
