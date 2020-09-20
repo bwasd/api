@@ -282,12 +282,7 @@ func handle(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	}
 }
 
-// Server creates an http.Server capable of handling requests against the
-// Product REST API.
-func Server(addr string) *http.Server {
-	logger = log.New(os.Stdout, "api: ", log.Lmicroseconds|log.LUTC)
-	logger.Println("Server started")
-
+func initRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 	// The hacky workaround below registers two route handlers for each endpoint
 	// to make endpoints trailing-slash invariant.
@@ -306,7 +301,16 @@ func Server(addr string) *http.Server {
 			}
 		}))
 	mux.Handle("/", index())
+	return mux
+}
 
+// Server creates an http.Server capable of handling requests against the
+// Product REST API.
+func Server(addr string) *http.Server {
+	logger = log.New(os.Stdout, "api: ", log.Lmicroseconds|log.LUTC)
+	logger.Println("Server started")
+
+	mux := initRoutes()
 	srv := &http.Server{
 		Addr:         addr,
 		Handler:      logHandler(logger)(mux),
