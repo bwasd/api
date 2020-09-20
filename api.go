@@ -26,12 +26,6 @@ var (
 	ProductRepository *API
 )
 
-var (
-	ErrAttribute   = errors.New("Attribute ill-formed")
-	ErrSKUName     = errors.New("SKU name ill-formed")
-	ErrSKUConflict = errors.New("SKU name conflict")
-)
-
 func checkContentType(expect string, r *http.Request) error {
 	ct := r.Header.Get("Content-Type")
 	// Not an error: Content-Type was not specified with an empty request body
