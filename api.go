@@ -53,23 +53,6 @@ func checkContentType(expect string, r *http.Request) error {
 	return nil
 }
 
-// ProductOps provides external operations for persisting products to underlying
-// storage.
-type ProductOps interface {
-	// Lookup looks up a product for the given SKU
-	Lookup(ctx context.Context, sku string) (*Product, error)
-
-	// List returns a list of Product records in the range lo, hi
-	List(ctx context.Context, lo, hi int) ([]*Product, error)
-
-	// Store writes or updates a product to storage
-	Store(ctx context.Context, sku string, prod *Product) error
-
-	// Remove removes the Product identified by SKU from storage
-	// TODO: implement this
-	// Remove(ctx context.Context, sku string) error
-}
-
 type API struct {
 	db *sql.DB
 }
