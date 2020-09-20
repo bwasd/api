@@ -3,16 +3,25 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/bwasd/api"
 )
 
-func main() {
-	p, err := ioutil.ReadFile("products.json")
+func post(file string) {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	file = filepath.Join(dir, file)
+	p, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,4 +40,34 @@ func main() {
 		}
 
 	}
+}
+
+var (
+	flagList = flag.Bool("list", false, "list")
+	flagFile = flag.String("file", "", "the file")
+)
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "usage: client [-list] [-post] [file...]\n")
+	flag.PrintDefaults()
+	os.Exit(2)
+}
+
+func main() {
+	log.SetPrefix("client: ")
+	log.SetFlags(0)
+	flag.Parse()
+
+	if *flagList {
+		if flag.NArg() > 0 {
+			usage()
+		}
+		// list()
+		return
+	}
+	if len(flag.Args()) > 1 {
+		fmt.Fprintf(os.Stderr, "too many arguments\n")
+		usage()
+	}
+	post(*flagFile)
 }
