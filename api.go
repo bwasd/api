@@ -335,19 +335,9 @@ func Server(addr string) *http.Server {
 	return srv
 }
 
-func Main(addr string) {
-	srv := Server(addr)
-	var err error
-	ProductRepository, err = NewRepository()
-	if err != nil {
-		logger.Printf("%v: db cluster unavailable!", err)
-		atomic.StoreUint32(&apiHealth, 0)
-	} else {
-		atomic.StoreUint32(&apiHealth, 1)
-	}
-
-	// Start a go routine to receive interrupt signals; the server will attempt
-	// to shutdown gracefully, without interrupting active connections.
+// gracefulShutdown will attempt to shutdown the server gracefully, without
+// interrupting active connections.
+func gracefulShutdown(srv *http.Server) {
 	go func() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
@@ -363,6 +353,20 @@ func Main(addr string) {
 			os.Exit(2)
 		}
 	}()
+}
+
+func Main(addr string) {
+	srv := Server(addr)
+	var err error
+	ProductRepository, err = NewRepository()
+	if err != nil {
+		logger.Printf("%v: db cluster unavailable!", err)
+		atomic.StoreUint32(&apiHealth, 0)
+	} else {
+		atomic.StoreUint32(&apiHealth, 1)
+	}
+
+	gracefulShutdown(srv)
 
 	logger.Printf("Server listening on address: %s\n", srv.Addr)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
